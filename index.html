@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Address Detector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+            width: 100%;
+        }
+        
+        .provider-btn {
+            padding: 20px;
+            background-color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            color: #444;
+            text-align: center;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .provider-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .provider-btn.selected {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .check-ip-container {
+            text-align: center;
+            margin: 30px 0;
+            width: 100%;
+        }
+        
+        #check-ip-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        
+        #check-ip-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        #check-ip-btn.checking {
+            background: linear-gradient(135deg, #a8a8a8 0%, #c0c0c0 100%);
+            cursor: not-allowed;
+        }
+        
+        .instructions {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-top: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .instructions h2 {
+            color: #2575fc;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #2575fc;
+        }
+        
+        .modal p {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        
+        .ip-details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: left;
+        }
+        
+        .close-btn {
+            padding: 10px 25px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+            width: 100%;
+        }
+        
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .admin-panel {
+            background-color: #e8f5e8;
+            border: 1px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            width: 100%;
+        }
+        
+        .admin-panel h3 {
+            color: #155724;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .buttons-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            .provider-btn {
+                font-size: 1rem;
+                min-height: 70px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.7rem;
+            }
+            
+            .buttons-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .provider-btn {
+                min-height: 60px;
+            }
+            
+            #check-ip-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>IP Address Detector</h1>
+            <p class="description">Select a provider and check if your IP address is available for use</p>
+        </header>
+        
+        <div id="connection-status" class="status info">
+            Testing database connection...
+        </div>
+        
+        <div class="buttons-grid">
+            <button class="provider-btn" data-provider="Adsempire 01">Adsempire 01</button>
+            <button class="provider-btn" data-provider="Adsempire 02">Adsempire 02</button>
+            <button class="provider-btn" data-provider="Adsempire 03">Adsempire 03</button>
+            <button class="provider-btn" data-provider="Imonatize it">Imonatize it</button>
+            <button class="provider-btn" data-provider="Crack Revenue">Crack Revenue</button>
+            <button class="provider-btn" data-provider="Affmine">Affmine</button>
+            <button class="provider-btn" data-provider="Adgain Media">Adgain Media</button>
+            <button class="provider-btn" data-provider="CPA Grip 01">CPA Grip 01</button>
+            <button class="provider-btn" data-provider="CPA Grip 02">CPA Grip 02</button>
+            <button class="provider-btn" data-provider="Nexxyneer">Nexxyneer</button>
+            <button class="provider-btn" data-provider="Trafee">Trafee</button>
+        </div>
+        
+        <div class="check-ip-container">
+            <button id="check-ip-btn">Check Your IP Address</button>
+        </div>
+
+        <div class="admin-panel">
+            <h3>📊 Database Status ( This for Admin Use Only )</h3>
+            <div id="database-stats">Loading statistics...</div>
+            <button onclick="refreshStats()" style="padding: 8px 16px; margin: 5px; background: #2575fc; color: white; border: none; border-radius: 5px; cursor: pointer;">Refresh Stats</button>
+            <button onclick="clearAllData()" style="padding: 8px 16px; margin: 5px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">Clear All Data</button>
+        </div>
+
+        <div class="instructions">
+            <h2>How It Works</h2>
+            <ol>
+                <li>Select one of the provider buttons above</li>
+                <li>Click the "Check Your IP Address" button that appears</li>
+                <li>Wait for the system to check your IP address availability</li>
+                <li>View the results and IP details in the popup</li>
+            </ol>
+            <p><strong>Database:</strong> Connected to Supabase PostgreSQL database</p>
+        </div>
+    </div>
+    
+    <!-- Modal for displaying results -->
+    <div id="result-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title">IP Address Check Result</h2>
+            <div id="modal-message"></div>
+            <div id="ip-details" class="ip-details" style="display: none;">
+                <h3>IP Address Details:</h3>
+                <p id="ip-info"></p>
+            </div>
+            <button class="close-btn" id="close-modal">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // =============================================
+        // SUPABASE CONFIGURATION - REPLACE WITH YOUR CREDENTIALS
+        // =============================================
+        const SUPABASE_CONFIG = {
+            url: 'https://pxlsylqoqzgpxlfvjnza.supabase.co',  // REPLACE WITH YOUR SUPABASE URL
+            key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4bHN5bHFvcXpncHhsZnZqbnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5OTQ3MzEsImV4cCI6MjA3NjU3MDczMX0.aLFQ1M39pTlQjU3nshxdpg4nDfQji33VnarSRdBdz4g'             // REPLACE WITH YOUR SUPABASE ANON KEY
+        };
+        // =============================================
+
+        // Selected provider variable
+        let selectedProvider = null;
+        
+        // Get DOM elements
+        const providerButtons = document.querySelectorAll('.provider-btn');
+        const checkIpBtn = document.getElementById('check-ip-btn');
+        const resultModal = document.getElementById('result-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const ipDetails = document.getElementById('ip-details');
+        const ipInfo = document.getElementById('ip-info');
+        const closeModal = document.getElementById('close-modal');
+        const connectionStatus = document.getElementById('connection-status');
+        const databaseStats = document.getElementById('database-stats');
+
+        // Initialize on page load
+        window.addEventListener('load', async () => {
+            await testSupabaseConnection();
+            await refreshStats();
+        });
+
+        // Test Supabase connection
+        async function testSupabaseConnection() {
+            try {
+                connectionStatus.textContent = '🔄 Connecting to Supabase database...';
+                
+                const response = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/ip_addresses?limit=1`, {
+                    headers: {
+                        'apikey': SUPABASE_CONFIG.key,
+                        'Authorization': `Bearer ${SUPABASE_CONFIG.key}`
+                    }
+                });
+
+                if (!response.ok) {
+                    // Try to create table if it doesn't exist
+                    await createTableIfNotExists();
+                    return;
+                }
+
+                connectionStatus.textContent = '✅ Connected to Supabase database successfully!';
+                connectionStatus.className = 'status success';
+                
+            } catch (error) {
+                connectionStatus.innerHTML = `
+                    ❌ Database connection failed: ${error.message}
+                    <br><small>Please check your Supabase configuration</small>
+                `;
+                connectionStatus.className = 'status error';
+            }
+        }
+
+        // Create table if it doesn't exist
+        async function createTableIfNotExists() {
+            try {
+                // This is a simplified approach - in production, you'd create the table via Supabase dashboard
+                connectionStatus.textContent = '⚠️ Please create the database table first';
+                connectionStatus.className = 'status error';
+                
+            } catch (error) {
+                connectionStatus.innerHTML = `
+                    ❌ Database setup required
+                    <br><small>Please create the ip_addresses table in your Supabase dashboard</small>
+                `;
+                connectionStatus.className = 'status error';
+            }
+        }
+
+        // Database functions for Supabase
+        async function checkIPInDatabase(ipAddress, provider) {
+            try {
+                // First, check if IP already exists for this provider
+                const checkResponse = await fetch(
+                    `${SUPABASE_CONFIG.url}/rest/v1/ip_addresses?ip_address=eq.${encodeURIComponent(ipAddress)}&provider=eq.${encodeURIComponent(provider)}`,
+                    {
+                        headers: {
+                            'apikey': SUPABASE_CONFIG.key,
+                            'Authorization': `Bearer ${SUPABASE_CONFIG.key}`
+                        }
+                    }
+                );
+
+                if (!checkResponse.ok) {
+                    throw new Error('Failed to check IP in database');
+                }
+
+                const existingRecords = await checkResponse.json();
+
+                if (existingRecords.length > 0) {
+                    return { exists: true, records: existingRecords };
+                } else {
+                    // Insert new IP address
+                    const insertResponse = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/ip_addresses`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': SUPABASE_CONFIG.key,
+                            'Authorization': `Bearer ${SUPABASE_CONFIG.key}`,
+                            'Prefer': 'return=representation'
+                        },
+                        body: JSON.stringify({
+                            ip_address: ipAddress,
+                            provider: provider
+                        })
+                    });
+
+                    if (!insertResponse.ok) {
+                        throw new Error('Failed to insert IP into database');
+                    }
+
+                    const newRecord = await insertResponse.json();
+                    return { exists: false, records: newRecord };
+                }
+            } catch (error) {
+                console.error('Database error:', error);
+                throw error;
+            }
+        }
+
+        // Get statistics from database
+        async function getDatabaseStats() {
+            try {
+                const response = await fetch(
+                    `${SUPABASE_CONFIG.url}/rest/v1/ip_addresses?select=*`,
+                    {
+                        headers: {
+                            'apikey': SUPABASE_CONFIG.key,
+                            'Authorization': `Bearer ${SUPABASE_CONFIG.key}`
+                        }
+                    }
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Count by provider
+                    const stats = {};
+                    data.forEach(record => {
+                        if (!stats[record.provider]) {
+                            stats[record.provider] = 0;
+                        }
+                        stats[record.provider]++;
+                    });
+                    
+                    return {
+                        total: data.length,
+                        byProvider: stats
+                    };
+                }
+                return { total: 0, byProvider: {} };
+            } catch (error) {
+                return { total: 0, byProvider: {} };
+            }
+        }
+
+        // Refresh statistics display
+        async function refreshStats() {
+            const stats = await getDatabaseStats();
+            let statsHTML = `<strong>Total IPs:</strong> ${stats.total}<br>`;
+            
+            if (stats.total > 0) {
+                statsHTML += '<strong>By Provider:</strong><br>';
+                for (const provider in stats.byProvider) {
+                    statsHTML += `• ${provider}: ${stats.byProvider[provider]}<br>`;
+                }
+            } else {
+                statsHTML += 'No IP addresses stored yet.';
+            }
+            
+            databaseStats.innerHTML = statsHTML;
+        }
+
+        // Clear all data (admin function)
+        async function clearAllData() {
+            if (!confirm('Are you sure you want to delete ALL IP address data? This cannot be undone!')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/ip_addresses`, {
+                    method: 'DELETE',
+                    headers: {
+                        'apikey': SUPABASE_CONFIG.key,
+                        'Authorization': `Bearer ${SUPABASE_CONFIG.key}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert('All data cleared successfully!');
+                    await refreshStats();
+                } else {
+                    throw new Error('Failed to clear data');
+                }
+            } catch (error) {
+                alert('Error clearing data: ' + error.message);
+            }
+        }
+        
+        // Add event listeners to provider buttons
+        providerButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Reset previously selected button
+                providerButtons.forEach(btn => {
+                    if (btn !== button) {
+                        btn.textContent = btn.getAttribute('data-provider');
+                        btn.classList.remove('selected');
+                    }
+                });
+                
+                // Set the selected provider
+                selectedProvider = button.getAttribute('data-provider');
+                
+                // Update button text and style
+                button.textContent = `You Selected ${selectedProvider}`;
+                button.classList.add('selected');
+                
+                // Show the Check IP button
+                checkIpBtn.style.display = 'inline-block';
+            });
+        });
+        
+        // Add event listener to Check IP button
+        checkIpBtn.addEventListener('click', async () => {
+            if (!selectedProvider) {
+                alert('Please select a provider first!');
+                return;
+            }
+            
+            // Change button text and disable it
+            checkIpBtn.textContent = 'Checking Your IP Availability...';
+            checkIpBtn.classList.add('checking');
+            checkIpBtn.disabled = true;
+            
+            try {
+                // Get user's IP address
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const userIP = ipData.ip;
+                
+                // Get IP details from a free API
+                let ipDetailsData = {};
+                try {
+                    const detailsResponse = await fetch(`https://ipapi.co/${userIP}/json/`);
+                    ipDetailsData = await detailsResponse.json();
+                } catch (ipError) {
+                    ipDetailsData = {
+                        city: 'Unknown',
+                        region: 'Unknown',
+                        country_name: 'Unknown',
+                        org: 'Unknown',
+                        timezone: 'Unknown'
+                    };
+                }
+                
+                // Check IP in database
+                const dbResult = await checkIPInDatabase(userIP, selectedProvider);
+                
+                // Show result
+                showResult(dbResult, userIP, ipDetailsData);
+                
+                // Refresh stats
+                await refreshStats();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                
+                // Show detailed error message
+                modalTitle.textContent = 'Error';
+                modalMessage.innerHTML = `
+                    <p style="color: #e74c3c; font-weight: bold;">There was an error checking your IP address.</p>
+                    <p style="font-size: 0.9rem; color: #666;">Error: ${error.message}</p>
+                    <p style="font-size: 0.9rem; color: #666;">Please check your database configuration.</p>
+                `;
+                ipDetails.style.display = 'none';
+                resultModal.style.display = 'flex';
+            } finally {
+                // Reset the Check IP button
+                checkIpBtn.textContent = 'Check Your IP Address';
+                checkIpBtn.classList.remove('checking');
+                checkIpBtn.disabled = false;
+            }
+        });
+
+        // Function to show results
+        function showResult(dbResult, userIP, ipDetailsData) {
+            // Show result in modal
+            modalTitle.textContent = 'IP Address Check Result';
+            
+            if (dbResult.exists) {
+                modalMessage.innerHTML = `
+                    <p style="color: #e74c3c; font-weight: bold;">Your IP Address Already Used.</p>
+                    <p style="font-size: 0.9rem; color: #666;">This IP address was previously used with ${selectedProvider}.</p>
+                `;
+            } else {
+                modalMessage.innerHTML = `
+                    <p style="color: #2ecc71; font-weight: bold;">You Can Use Your IP Address.</p>
+                    <p style="font-size: 0.9rem; color: #666;">Your IP has been saved to ${selectedProvider} database.</p>
+                `;
+            }
+            
+            // Display IP details
+            ipDetails.style.display = 'block';
+            ipInfo.innerHTML = `
+                <strong>IP Address:</strong> ${userIP}<br>
+                <strong>Location:</strong> ${ipDetailsData.city || 'Unknown'}, ${ipDetailsData.region || 'Unknown'}, ${ipDetailsData.country_name || 'Unknown'}<br>
+                <strong>ISP:</strong> ${ipDetailsData.org || 'Unknown'}<br>
+                <strong>Timezone:</strong> ${ipDetailsData.timezone || 'Unknown'}
+            `;
+            
+            // Show the modal
+            resultModal.style.display = 'flex';
+        }
+        
+        // Close modal when close button is clicked
+        closeModal.addEventListener('click', () => {
+            resultModal.style.display = 'none';
+        });
+        
+        // Close modal when clicking outside of it
+        window.addEventListener('click', (event) => {
+            if (event.target === resultModal) {
+                resultModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
